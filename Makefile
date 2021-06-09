@@ -1,12 +1,53 @@
-include ../make_config
+#MAKE?=mingw32-make
+AR?=ar
+ARFLAGS?=rcs
+PATHSEP?=/
+CC=gcc
+BUILDROOT?=build
+
+ifeq ($(CLANG),1)
+	export CC=clang
+endif
+
+BUILDDIR?=$(BUILDROOT)$(PATHSEP)$(CC)
+BUILDPATH?=$(BUILDDIR)$(PATHSEP)
+
+INSTALL_ROOT?=$(BUILDPATH)
+
+ifeq ($(DEBUG),1)
+	export debug=-ggdb -Ddebug=1
+	export isdebug=1
+endif
+
+ifeq ($(ANALYSIS),1)
+	export analysis=-Danalysis=1
+	export isanalysis=1
+endif
+
+ifeq ($(DEBUG),2)
+	export debug=-ggdb -Ddebug=2
+	export isdebug=1
+endif
+
+ifeq ($(DEBUG),3)
+	export debug=-ggdb -Ddebug=3
+	export isdebug=1
+endif
+
+ifeq ($(OUTPUT),1)
+	export outimg= -Doutput=1
+endif
 
 CFLAGS=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra -O1 $(debug)
-#-ggdb 
+#-ggdb
 #-pg for profiling 
+
+LIB?=-L/c/dev/lib
+INCLUDE?=-I/c/dev/include -I.
 
 SRC=texture.c
 
-INCLUDEDIR=-I./../math/algorithm/fractals/ -I./../math/algorithm/noise/ -I./../collections/array/ -I./../color -I./../math/statistics -I./../math/vec -I./../math/mat -I./../math/utils -I.
+INCLUDEDIR=$(INCLUDE) -I.
 
 LIBNAME=libtexture.a
 OBJS=texture.o
@@ -14,15 +55,7 @@ OBJS=texture.o
 TESTSRC=test_texture.c
 TESTBIN=test_texture.exe
 TESTLIB=-ltexture -lfractals -lnoise -lcrgb_array -lfarray -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
-TESTLIBDIR=-L$(BUILDDIR) \
-			-L./../math/algorithm/fractals/$(BUILDDIR) \
-			-L./../math/algorithm/noise/$(BUILDDIR) \
-			-L./../collections/array/$(BUILDDIR) \
-			-L./../color/$(BUILDDIR) \
-			-L./../math/statistics/$(BUILDDIR) \
-			-L./../math/utils/$(BUILDDIR) \
-			-L./../math/mat/$(BUILDDIR) \
-			-L./../math/vec/$(BUILDDIR)
+TESTLIBDIR=-L$(BUILDDIR) $(LIB)
 
 all: createdir $(BUILDPATH)$(LIBNAME) $(BUILDPATH)$(TESTBIN)
 
@@ -46,4 +79,11 @@ test:
 
 clean:
 	-rm -dfr $(BUILDROOT)
+
+install:
+	mkdir -p $(INSTALL_ROOT)include
+	mkdir -p $(INSTALL_ROOT)lib
+	cp ./texture.h $(INSTALL_ROOT)include/texture.h
+	cp $(BUILDPATH)$(LIBNAME) $(INSTALL_ROOT)lib/$(LIBNAME)
+
 	

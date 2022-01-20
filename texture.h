@@ -32,6 +32,7 @@ extern const size_t texture_size;
 texture_t * texture_new(const unsigned int w, const unsigned int h);
 texture_t * texture_copy(texture_t * texture);
 void texture_free(texture_t * texture);
+void texture_clear(texture_t * texture, cRGB_t *clearcolor);
 
 void filter_invert(texture_t * texture, const unsigned int ignore, const float ignore_too);
 void filter_middle_arith(texture_t * texture, const unsigned int pxrange, const float factor);

@@ -29,6 +29,24 @@ void texture_free(texture_t * texture){
 	}
 }
 
+void texture_clear(texture_t * texture, cRGB_t *clearcolor)
+{
+	cRGB_t * cref;
+	array_error_t array_res;
+	
+	for (unsigned int h = 0; h < texture->height; ++h){
+	  for (unsigned int w = 0; w < texture->width; ++w){
+
+		array_res = crgb_array2D_get_ref(texture->buffer, w, h, &cref);
+		if(array_res==ARRAY_ERR_OK){
+			cref->r = clearcolor->r;
+			cref->g = clearcolor->g;
+			cref->b = clearcolor->b;
+		}
+	  }
+	}
+}
+
 void 
 noise_to_texture( const noise_t * src, texture_t * target){
 	if ( src->map->config->size == target->buffer->config->size &&

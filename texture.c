@@ -502,3 +502,27 @@ save_texture_ppm(const texture_t * texture, const char * filename){
 	(void) fclose(fp);
 	array_iterator_free(it);
 }
+
+void 
+save_texture_normalized_ppm(const texture_t * texture, const char * filename){
+	array_iterator_t * it = array_iterator_new(texture->buffer);
+	cRGB_t curcolor;
+	FILE *fp = fopen(filename, "wb"); /* b - binary mode */
+    (void) fprintf(fp, "P6\n%d %d\n255\n", texture->width, texture->height);
+	for( unsigned int curH = 0; curH < texture->height; curH++ )
+	{
+		for( unsigned int curW = 0; curW < texture->width; curW++ )
+		{
+			crgb_array2D_get(texture->buffer, curW, curH, &curcolor);
+			static unsigned char color[3];
+			color[0] = (unsigned char)( curcolor.r * 255.f);  
+			color[1] = (unsigned char)( curcolor.g * 255.f);  
+			color[2] = (unsigned char)( curcolor.b * 255.f);  
+			(void) fwrite(color, 1, 3, fp);
+		}
+	}
+
+	(void) fclose(fp);
+	array_iterator_free(it);
+}
+

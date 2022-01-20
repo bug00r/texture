@@ -56,5 +56,5 @@ void julia_color_normal_8Bit(const julia_t * julia, const julia_point_t * jbt, c
 void julia_color_line_int_8Bit(const julia_t * julia, const julia_point_t * jbt, cRGB_t * col);
 						   
 void save_texture_ppm(const texture_t * texture, const char * filename);
-
+void save_texture_normalized_ppm(const texture_t * texture, const char * filename);
 #endif

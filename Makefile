@@ -57,24 +57,28 @@ SRC=texture.c
 INCLUDEDIR=$(INCLUDE) -I.
 
 LIBNAME=libtexture.a
-OBJS=texture.o
+OBJS=$(BUILDPATH)texture.o $(BUILDPATH)texture_cache.o
 
 TESTSRC=test_texture.c
+CACHETESTSRC=test_texture_cache.c
 TESTBIN=test_texture.exe
-TESTLIB=-ltexture -lfractals -lnoise -lcrgb_array -lfarray -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
+CACHETESTBIN=test_texture_cache.exe
+TESTLIB=-ltexture -lfractals -lnoise -lcrgb_array -lfarray -ldl_list -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
 TESTLIBDIR=-L$(BUILDDIR) $(LIB)
 
-all: createdir $(BUILDPATH)$(LIBNAME) $(BUILDPATH)$(TESTBIN)
+all: createdir $(BUILDPATH)$(LIBNAME) $(BUILDPATH)$(TESTBIN) $(BUILDPATH)$(CACHETESTBIN)
 
-$(BUILDPATH)$(LIBNAME): $(BUILDPATH)$(OBJS)
-	$(AR) $(ARFLAGS) $(BUILDPATH)$(LIBNAME) $(BUILDPATH)$(OBJS)
+$(BUILDPATH)$(LIBNAME): $(OBJS)
+	$(AR) $(ARFLAGS) $(BUILDPATH)$(LIBNAME) $(OBJS)
 
-$(BUILDPATH)$(OBJS):
-	$(CC) $(CFLAGS) -c $(SRC) -o $(BUILDPATH)$(OBJS) $(INCLUDEDIR) 
+$(BUILDPATH)%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDEDIR) 
 	
 $(BUILDPATH)$(TESTBIN):
 	$(CC) $(CFLAGS) $(TESTSRC) -o $(BUILDPATH)$(TESTBIN) $(INCLUDEDIR) $(TESTLIBDIR) $(TESTLIB) $(debug) $(outimg)
 	
+$(BUILDPATH)$(CACHETESTBIN):
+	$(CC) $(CFLAGS) $(CACHETESTSRC) -o $(BUILDPATH)$(CACHETESTBIN) $(INCLUDEDIR) $(TESTLIBDIR) $(TESTLIB) $(debug)
 
 .PHONY: createdir clean test
 
@@ -83,6 +87,7 @@ createdir:
 
 test:
 	./$(BUILDPATH)$(TESTBIN)
+	./$(BUILDPATH)$(CACHETESTBIN)
 
 clean:
 	-rm -dfr $(BUILDROOT)
@@ -91,6 +96,7 @@ install:
 	mkdir -p $(INSTALL_ROOT)include
 	mkdir -p $(INSTALL_ROOT)lib$(BIT_SUFFIX)
 	cp ./texture.h $(INSTALL_ROOT)include/texture.h
+	cp ./texture_cache.h $(INSTALL_ROOT)include/texture_cache.h
 	cp $(BUILDPATH)$(LIBNAME) $(INSTALL_ROOT)lib$(BIT_SUFFIX)/$(LIBNAME)
 
 	

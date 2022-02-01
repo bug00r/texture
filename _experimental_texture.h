@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <float.h>
-#include "utils_math.h"
+#include "utilsmath.h"
 #include "array.h"
 #include "color.h"
 #include "crgb_array.h"

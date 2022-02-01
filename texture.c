@@ -193,8 +193,8 @@ julia_to_texture( const julia_t * src,
 	}
 }
 
-void filter_invert(texture_t * texture, const unsigned int ignore, const float ignore_too) {
-	
+void filter_invert(texture_t * texture) {
+
 	cRGB_t * cref;
 	array_error_t array_res;
 	

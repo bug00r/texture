@@ -45,40 +45,40 @@ ifeq ($(M32),1)
 	BIT_SUFFIX+=32
 endif
 
-CFLAGS+=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra $(debug)
+CFLAGS+=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra $(debug) $(outimg)
 #-ggdb
 #-pg for profiling 
 
-LIB?=-L/c/dev/lib$(BIT_SUFFIX)
+
 INCLUDE?=-I/c/dev/include -I.
 
-SRC=texture.c
+NAME=texture
 
-INCLUDEDIR=$(INCLUDE) -I.
+LIBNAME=lib$(NAME).a
+LIB=$(BUILDPATH)$(LIBNAME)
 
-LIBNAME=libtexture.a
 OBJS=$(BUILDPATH)texture.o $(BUILDPATH)texture_cache.o
 
-TESTSRC=test_texture.c
-CACHETESTSRC=test_texture_cache.c
-TESTBIN=test_texture.exe
-CACHETESTBIN=test_texture_cache.exe
-TESTLIB=-ltexture -lfractals -lnoise -lcrgb_array -lfarray -ldl_list -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
-TESTLIBDIR=-L$(BUILDDIR) $(LIB)
+TESTSRC=test_$(NAME).c
+CACHETESTSRC=test_$(NAME)_cache.c
+TESTBIN=$(BUILDPATH)test_$(NAME).exe
+CACHETESTBIN=$(BUILDPATH)test_$(NAME)_cache.exe
+TESTLIB=-l$(NAME) -lfractals -lnoise -lcrgb_array -lfarray -ldl_list -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
+TESTLIBDIR=-L$(BUILDDIR) -L/c/dev/lib$(BIT_SUFFIX)
 
-all: createdir $(BUILDPATH)$(LIBNAME) $(BUILDPATH)$(TESTBIN) $(BUILDPATH)$(CACHETESTBIN)
+all: createdir $(LIB) $(TESTBIN) $(CACHETESTBIN)
 
-$(BUILDPATH)$(LIBNAME): $(OBJS)
-	$(AR) $(ARFLAGS) $(BUILDPATH)$(LIBNAME) $(OBJS)
+$(LIB): $(OBJS)
+	$(AR) $(ARFLAGS) $@ $^
 
-$(BUILDPATH)%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDEDIR) 
+$(OBJS):
+	$(CC) $(CFLAGS) -c $(@F:.o=.c) -o $@ $(INCLUDE) 
 	
-$(BUILDPATH)$(TESTBIN):
-	$(CC) $(CFLAGS) $(TESTSRC) -o $(BUILDPATH)$(TESTBIN) $(INCLUDEDIR) $(TESTLIBDIR) $(TESTLIB) $(debug) $(outimg)
+$(TESTBIN):
+	$(CC) $(CFLAGS) $(@F:.exe=.c) -o $@ $(INCLUDE) $(TESTLIBDIR) $(TESTLIB) 
 	
-$(BUILDPATH)$(CACHETESTBIN):
-	$(CC) $(CFLAGS) $(CACHETESTSRC) -o $(BUILDPATH)$(CACHETESTBIN) $(INCLUDEDIR) $(TESTLIBDIR) $(TESTLIB) $(debug)
+$(CACHETESTBIN):
+	$(CC) $(CFLAGS) $(@F:.exe=.c) -o $@ $(INCLUDE) $(TESTLIBDIR) $(TESTLIB)
 
 .PHONY: createdir clean test
 
@@ -86,8 +86,8 @@ createdir:
 	mkdir -p $(BUILDDIR)
 
 test:
-	./$(BUILDPATH)$(TESTBIN)
-	./$(BUILDPATH)$(CACHETESTBIN)
+	./$(TESTBIN)
+	./$(CACHETESTBIN)
 
 clean:
 	-rm -dfr $(BUILDROOT)
@@ -95,8 +95,8 @@ clean:
 install:
 	mkdir -p $(INSTALL_ROOT)include
 	mkdir -p $(INSTALL_ROOT)lib$(BIT_SUFFIX)
-	cp ./texture.h $(INSTALL_ROOT)include/texture.h
-	cp ./texture_cache.h $(INSTALL_ROOT)include/texture_cache.h
-	cp $(BUILDPATH)$(LIBNAME) $(INSTALL_ROOT)lib$(BIT_SUFFIX)/$(LIBNAME)
+	cp ./$(NAME).h $(INSTALL_ROOT)include$(PATHSEP)$(NAME).h
+	cp ./$(NAME)_cache.h $(INSTALL_ROOT)include$(PATHSEP)$(NAME)_cache.h
+	cp $(LIB) $(INSTALL_ROOT)lib$(BIT_SUFFIX)$(PATHSEP)$(LIBNAME)
 
 	

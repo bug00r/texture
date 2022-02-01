@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <float.h>
-#include "utils_math.h"
+#include "utilsmath.h"
 #include "array.h"
 #include "color.h"
 #include "crgb_array.h"
@@ -34,7 +34,7 @@ texture_t * texture_copy(texture_t * texture);
 void texture_free(texture_t * texture);
 void texture_clear(texture_t * texture, cRGB_t *clearcolor);
 
-void filter_invert(texture_t * texture, const unsigned int ignore, const float ignore_too);
+void filter_invert(texture_t * texture);
 void filter_middle_arith(texture_t * texture, const unsigned int pxrange, const float factor);
 void filter_middle_median_box(texture_t * texture, const unsigned int pxrange, const float factor);
 void filter_middle_median_cross(texture_t * texture, const unsigned int pxrange, const float factor);

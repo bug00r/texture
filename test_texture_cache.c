@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include "renderer.h"
+//#include "renderer.h"
 #include "scene_builder.h"
 #include "texture.h"
 #include "texture_cache.h"

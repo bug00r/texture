@@ -37,14 +37,14 @@ ifeq ($(OUTPUT),1)
 	CFLAGS+=-Doutput=1
 endif
 
-CFLAGS+=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra
+override CFLAGS+=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra
 
 #debug
 #CFLAGS+=-ggdb
 #profiling
 #CFLAGS+=-pg 
 
-CFLAGS+=-I/c/dev/include -I.
+override CFLAGS+=-I/c/dev/include -I.
 
 NAME=texture
 
@@ -57,10 +57,11 @@ TESTSRC=test_$(NAME).c
 CACHETESTSRC=test_$(NAME)_cache.c
 TESTBIN=$(BUILDPATH)test_$(NAME).exe
 CACHETESTBIN=$(BUILDPATH)test_$(NAME)_cache.exe
-LDFLAGS+=-L$(BUILDDIR) -L/c/dev/lib$(BIT_SUFFIX)
-LDFLAGS+=-l$(NAME) -lfractals -lnoise -lcrgb_array -lfarray -ldl_list -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
 
-all: createdir $(LIB) $(TESTBIN) $(CACHETESTBIN)
+override LDFLAGS+=-L$(BUILDDIR) -L/c/dev/lib$(BIT_SUFFIX)
+override LDFLAGS+=-l$(NAME) -lfractals -lnoise -lcrgb_array -lfarray -ldl_list -larray -lcolor -lstatistics -lutilsmath -lmat -lvec 
+
+all: createdir $(LIB)
 
 $(LIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^

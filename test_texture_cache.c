@@ -12,11 +12,11 @@ main() {
 		printf("Start test texture cache\n");
 	#endif	
 	
-	texture_cache_t* cache = texture_cache_new();
+	TextureCache* cache = texture_cache_new();
 
-	texture_t * tex1 = texture_new(20, 20);
-	texture_t * tex2 = texture_new(30, 30);
-	texture_t * tex3 = texture_new(40, 40);
+	Texture * tex1 = texture_new(20, 20);
+	Texture * tex2 = texture_new(30, 30);
+	Texture * tex3 = texture_new(40, 40);
 
 	int id = texture_cache_register(cache, tex1);
 	assert(id == 0);
@@ -27,7 +27,7 @@ main() {
 	id = texture_cache_register(cache, tex3);
 	assert(id == 2);
 
-	texture_t *texture = texture_cache_get(cache, 500);
+	Texture *texture = texture_cache_get(cache, 500);
 	assert(texture == NULL);
 
 	texture = texture_cache_get(cache, 1);

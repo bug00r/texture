@@ -4,22 +4,22 @@ static void __tex_cache_texture_free_wrapper(void **data, void *eachdata)
 {
 	(void)(eachdata);
 
-	texture_t *texture = (texture_t *)*data;
+	Texture *texture = (Texture *)*data;
 	texture_free(texture);
 }
 
-texture_cache_t* texture_cache_new()
+TextureCache* texture_cache_new()
 {
-    texture_cache_t* newcache = malloc(sizeof(texture_cache_t));
+    TextureCache* newcache = malloc(sizeof(TextureCache));
     newcache->textures = dl_list_new();
     return newcache;
 }
 
-void texture_cache_free(texture_cache_t **cache)
+void texture_cache_free(TextureCache **cache)
 {
     if ( cache != NULL && *cache != NULL )
     {
-        texture_cache_t *to_delete = *cache;
+        TextureCache *to_delete = *cache;
         if ( to_delete->textures != NULL )
 		{
 			dl_list_each_data(to_delete->textures, NULL, __tex_cache_texture_free_wrapper);
@@ -30,13 +30,13 @@ void texture_cache_free(texture_cache_t **cache)
     } 
 }
 
-int texture_cache_register(texture_cache_t *cache, texture_t *texture)
+int texture_cache_register(TextureCache *cache, Texture *texture)
 {
     dl_list_append(cache->textures, texture);
     return cache->textures->cnt - 1;
 }
 
-texture_t* texture_cache_get(texture_cache_t *cache, unsigned int id)
+Texture* texture_cache_get(TextureCache *cache, unsigned int id)
 {
     if ( cache != NULL)
     {

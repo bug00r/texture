@@ -1,38 +1,38 @@
 #include "texture.h"
 
-const size_t texture_size = sizeof(texture_t);
+const size_t texture_size = sizeof(Texture);
 
-texture_t * 
+Texture * 
 texture_new(const unsigned int w, const unsigned int h){
-	texture_t * newtexture = malloc(texture_size);
+	Texture * newtexture = malloc(texture_size);
 	newtexture->width=w;
 	newtexture->height=h;
 	newtexture->buffer = crgb_array2D_new(w,h);
-	cRGB_t black = {0.f, 0.f, 0.f};
+	ColorRGB black = {0.f, 0.f, 0.f};
 	crgb_array_init(newtexture->buffer, &black);
 	
 	return newtexture;
 }
 
-texture_t * texture_copy(texture_t * texture){
-	texture_t * newtexture = malloc(texture_size);
+Texture * texture_copy(Texture * texture){
+	Texture * newtexture = malloc(texture_size);
 	newtexture->width=texture->width;
 	newtexture->height=texture->height;
 	newtexture->buffer = array_copy_deep(texture->buffer);
 	return newtexture;
 }
 
-void texture_free(texture_t * texture){
+void texture_free(Texture * texture){
 	if(texture != NULL) {
 		array_free(texture->buffer);
 		free(texture);
 	}
 }
 
-void texture_clear(texture_t * texture, cRGB_t *clearcolor)
+void texture_clear(Texture * texture, ColorRGB *clearcolor)
 {
-	cRGB_t * cref;
-	array_error_t array_res;
+	ColorRGB * cref;
+	ArrayError array_res;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -48,17 +48,17 @@ void texture_clear(texture_t * texture, cRGB_t *clearcolor)
 }
 
 void 
-noise_to_texture( const noise_t * src, texture_t * target){
+Noiseo_texture( const Noise * src, Texture * target){
 	if ( src->map->config->size == target->buffer->config->size &&
 		 src->map->config->cnt == target->buffer->config->cnt) {
-		cRGB_t * curcolor;
+		ColorRGB * curcolor;
 		float colval;
 		const float * noise_array = (const float*)src->map->entries;
-		array_iterator_t * it = array_iterator_new(target->buffer);
+		ArrayIterator * it = array_iterator_new(target->buffer);
 		
 		while(array_iterator_has_next(it)){
 			const float noise_val = noise_array[it->index];
-			curcolor = (cRGB_t *)array_iterator_next(it);
+			curcolor = (ColorRGB *)array_iterator_next(it);
 			colval = interpolate_lin(noise_val, src->min, 0.f, src->max, 255.f);
 			curcolor->r = colval;
 			curcolor->g = colval;
@@ -69,7 +69,7 @@ noise_to_texture( const noise_t * src, texture_t * target){
 }
 
 void 
-mandelbrot_color_normal_8Bit(const mandelbrot_t * mb, const mandelbrot_point_t * mbt, cRGB_t * col){
+mandelbrot_color_normal_8Bit(const Mandelbrot * mb, const MandelbrotPoint * mbt, ColorRGB * col){
 	/**
 		float colfactor = 1.f/curresult.abs;
 		float its = ((float)curresult.iterations)/src->cntiterations;
@@ -90,7 +90,7 @@ mandelbrot_color_normal_8Bit(const mandelbrot_t * mb, const mandelbrot_point_t *
 }
 
 /**
-mandelbrot_t *mb = mandelbrot_new(w, h);
+Mandelbrot *mb = mandelbrot_new(w, h);
 	mb->minreal = -2.f;//-1.3f;
 	mb->maxreal = 0.5f;//-1.f;
 	mb->minimag = -1.f;//-.3f;
@@ -98,7 +98,7 @@ mandelbrot_t *mb = mandelbrot_new(w, h);
 	mb->cntiterations = 20;
 */
 void 
-mandelbrot_color_line_int_8Bit(const mandelbrot_t * mb,const mandelbrot_point_t * mbt, cRGB_t * col){
+mandelbrot_color_line_int_8Bit(const Mandelbrot * mb,const MandelbrotPoint * mbt, ColorRGB * col){
 	if(!mbt->isin){	
 		col->r = interpolate_lin(cabsf(mbt->cpoint), mb->minreal, 0.f, mb->maxreal, 255.f); //real
 		col->g = 0.f;//interpolate_lin(cimagf(mbt->cpoint), mb->minimag, 0.f, mb->maximag, 255.f); //imag
@@ -111,7 +111,7 @@ mandelbrot_color_line_int_8Bit(const mandelbrot_t * mb,const mandelbrot_point_t 
 }
 
 void 
-mandelbrot_color_line_int_rgb(const mandelbrot_t * mb, const mandelbrot_point_t * mbt, cRGB_t * col){
+mandelbrot_color_line_int_rgb(const Mandelbrot * mb, const MandelbrotPoint * mbt, ColorRGB * col){
 	if(!mbt->isin){	
 		col->r = interpolate_lin(cabsf(mbt->cpoint), mb->minreal, 0.f, mb->maxreal, 1.f); //real
 		col->g = 0.f;//interpolate_lin(cimagf(mbt->cpoint), mb->minimag, 0.f, mb->maximag, 1.f); //imag
@@ -124,18 +124,18 @@ mandelbrot_color_line_int_rgb(const mandelbrot_t * mb, const mandelbrot_point_t 
 }
 
 void 
-mandelbrot_to_texture( const mandelbrot_t * src, 
-					   texture_t * target, 
-					   void (*mb_color_func)(const mandelbrot_t * mb, const mandelbrot_point_t * mbt, cRGB_t * col)){
+Mandelbroto_texture( const Mandelbrot * src, 
+					   Texture * target, 
+					   void (*mb_color_func)(const Mandelbrot * mb, const MandelbrotPoint * mbt, ColorRGB * col)){
 	if ( src->map->config->size == target->buffer->config->size &&
 		 src->map->config->cnt == target->buffer->config->cnt) 
 	{
-		array_iterator_t * it = array_iterator_new(target->buffer);
-		mandelbrot_point_t * mb_array = (mandelbrot_point_t *)src->map->entries;
+		ArrayIterator * it = array_iterator_new(target->buffer);
+		MandelbrotPoint * mb_array = (MandelbrotPoint *)src->map->entries;
 		while(array_iterator_has_next(it))
 		{
-			const mandelbrot_point_t * mbt = &mb_array[it->index];
-			cRGB_t * col = (cRGB_t *)array_iterator_next(it);
+			const MandelbrotPoint * mbt = &mb_array[it->index];
+			ColorRGB * col = (ColorRGB *)array_iterator_next(it);
 			(*mb_color_func)(src, mbt, col);
 		}
 		array_iterator_free(it);
@@ -143,7 +143,7 @@ mandelbrot_to_texture( const mandelbrot_t * src,
 }
 
 void 
-julia_color_normal_8Bit(const julia_t * src, const julia_point_t * jbt, cRGB_t * col){
+julia_color_normal_8Bit(const Julia * src, const JuliaPoint * jbt, ColorRGB * col){
 	const float colfactor = ((float)jbt->iterations)/(src->cntiterations*0.2f);
 	#if 0
 		//colval = ( noise_val > 1.f ? 1.f : (noise_val < -1.f ? -1.f : noise_val) );
@@ -161,7 +161,7 @@ julia_color_normal_8Bit(const julia_t * src, const julia_point_t * jbt, cRGB_t *
 }
 
 void 
-julia_color_line_int_8Bit(const julia_t * julia, const julia_point_t * jbt, cRGB_t * col){
+julia_color_line_int_8Bit(const Julia * julia, const JuliaPoint * jbt, ColorRGB * col){
 	if(jbt->isin){	
 		float colfactor_real = interpolate_lin(crealf(jbt->spoint), julia->minreal, 0.f, julia->maxreal, 255.f) / 255.f;
 		float colfactor_imag = interpolate_lin(cimagf(jbt->spoint), julia->minimag, 0.f, julia->maximag, 255.f) / 255.f;
@@ -177,26 +177,26 @@ julia_color_line_int_8Bit(const julia_t * julia, const julia_point_t * jbt, cRGB
 }
 
 void 
-julia_to_texture( const julia_t * src, 
-				  texture_t * target,  
-				  void (*jul_color_func)(const julia_t * julia, const julia_point_t * jbt, cRGB_t * col)){
+Juliao_texture( const Julia * src, 
+				  Texture * target,  
+				  void (*jul_color_func)(const Julia * julia, const JuliaPoint * jbt, ColorRGB * col)){
 	if ( src->map->config->size == target->buffer->config->size &&
 		 src->map->config->cnt == target->buffer->config->cnt) {
-		array_iterator_t * it = array_iterator_new(target->buffer);
-		julia_point_t * j_array = (julia_point_t *)src->map->entries;
+		ArrayIterator * it = array_iterator_new(target->buffer);
+		JuliaPoint * j_array = (JuliaPoint *)src->map->entries;
 		while(array_iterator_has_next(it)){
-			const julia_point_t * jbt = &j_array[it->index];
-			 cRGB_t * col = (cRGB_t *)array_iterator_next(it);
+			const JuliaPoint * jbt = &j_array[it->index];
+			 ColorRGB * col = (ColorRGB *)array_iterator_next(it);
 			(*jul_color_func)(src, jbt, col);
 		}
 		array_iterator_free(it);
 	}
 }
 
-void filter_invert(texture_t * texture) {
+void filter_invert(Texture * texture) {
 
-	cRGB_t * cref;
-	array_error_t array_res;
+	ColorRGB * cref;
+	ArrayError array_res;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -212,15 +212,15 @@ void filter_invert(texture_t * texture) {
 }
 
 void 
-filter_middle_median_box(texture_t * texture, const unsigned int pxrange, const float factor){
+filter_middle_median_box(Texture * texture, const unsigned int pxrange, const float factor){
 	unsigned int maxlength = pxrange*2+1;
 	maxlength *= maxlength;
 	float * values_r = malloc(maxlength * sizeof(float));
 	float * values_g = malloc(maxlength * sizeof(float));
 	float * values_b = malloc(maxlength * sizeof(float));
 	
-	cRGB_t * cref;
-	array_error_t array_res;
+	ColorRGB * cref;
+	ArrayError array_res;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -261,13 +261,13 @@ filter_middle_median_box(texture_t * texture, const unsigned int pxrange, const 
 }
 
 //void 
-//filter_middle_median_box(texture_t * texture, const unsigned int pxrange, const float factor){
+//filter_middle_median_box(Texture * texture, const unsigned int pxrange, const float factor){
 //	unsigned int maxlength = pxrange*2+1;
 //	maxlength *= maxlength;
 //	float * values = malloc(maxlength * sizeof(float));
 //	
-//	cRGB_t * cref;
-//	array_error_t array_res;
+//	ColorRGB * cref;
+//	ArrayError array_res;
 //	
 //	for (unsigned int h = 0; h < texture->height; ++h){
 //	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -296,11 +296,11 @@ filter_middle_median_box(texture_t * texture, const unsigned int pxrange, const 
 //	free(values);
 //}
 
-void filter_middle_cubic_box(texture_t * texture, const unsigned int pxrange, const float factor) {
+void filter_middle_cubic_box(Texture * texture, const unsigned int pxrange, const float factor) {
 	
-	cRGB_t * cref;
-	array_error_t array_res;
-	cRGB_t newval;
+	ColorRGB * cref;
+	ArrayError array_res;
+	ColorRGB newval;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -335,12 +335,12 @@ void filter_middle_cubic_box(texture_t * texture, const unsigned int pxrange, co
 }
 
 void 
-filter_middle_median_cross(texture_t * texture, const unsigned int pxrange, const float factor) {
+filter_middle_median_cross(Texture * texture, const unsigned int pxrange, const float factor) {
 	const unsigned int cntValues = (4*pxrange)+1;
 	float * values = malloc(cntValues*sizeof(float));
 	const unsigned int maxidx = texture->width-1;
 	
-	cRGB_t * cref;
+	ColorRGB * cref;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -384,12 +384,12 @@ filter_middle_median_cross(texture_t * texture, const unsigned int pxrange, cons
 	free(values);
 }
 
-void filter_middle_median_diag_cross(texture_t * texture, const unsigned int pxrange, const float factor) {
+void filter_middle_median_diag_cross(Texture * texture, const unsigned int pxrange, const float factor) {
 	const unsigned int cntValues = (4*pxrange)+1;
 	float * values = malloc(cntValues*sizeof(float));
 	const unsigned int maxidx = texture->width-1;
 	
-	cRGB_t * cref;
+	ColorRGB * cref;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
@@ -425,10 +425,10 @@ void filter_middle_median_diag_cross(texture_t * texture, const unsigned int pxr
 }
 
 void 
-filter_middle_arith(texture_t * texture, const unsigned int pxrange, const float factor){
-	cRGB_t * cref;
-	array_error_t array_res;
-	cRGB_t newval;
+filter_middle_arith(Texture * texture, const unsigned int pxrange, const float factor){
+	ColorRGB * cref;
+	ArrayError array_res;
+	ColorRGB newval;
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
 		newval.r = 0.f;
@@ -456,7 +456,7 @@ filter_middle_arith(texture_t * texture, const unsigned int pxrange, const float
 	}
 }
 
-void filter_gaussian(texture_t * texture, const unsigned int pxrange, const float deviation)
+void filter_gaussian(Texture * texture, const unsigned int pxrange, const float deviation)
 {
 
 	//https://homepages.inf.ed.ac.uk/rbf/HIPR2/gsmooth.htm
@@ -473,9 +473,9 @@ void filter_gaussian(texture_t * texture, const unsigned int pxrange, const floa
 		}
 	}
 
-	cRGB_t * cref;
-	array_error_t array_res;
-	cRGB_t newval;
+	ColorRGB * cref;
+	ArrayError array_res;
+	ColorRGB newval;
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  for (unsigned int w = 0; w < texture->width; ++w){
 		newval.r = 0.f;
@@ -504,13 +504,13 @@ void filter_gaussian(texture_t * texture, const unsigned int pxrange, const floa
 }
 
 void 
-save_texture_ppm(const texture_t * texture, const char * filename){
-	array_iterator_t * it = array_iterator_new(texture->buffer);
-	cRGB_t * curcolor;
+save_texture_ppm(const Texture * texture, const char * filename){
+	ArrayIterator * it = array_iterator_new(texture->buffer);
+	ColorRGB * curcolor;
 	FILE *fp = fopen(filename, "wb"); /* b - binary mode */
     (void) fprintf(fp, "P6\n%d %d\n255\n", texture->width, texture->height);
 	while(array_iterator_has_next(it)){
-		curcolor = (cRGB_t *)array_iterator_next(it);
+		curcolor = (ColorRGB *)array_iterator_next(it);
 		static unsigned char color[3];
 		color[0] = (unsigned char)curcolor->r ;  
 		color[1] = (unsigned char)curcolor->g ;  
@@ -522,9 +522,9 @@ save_texture_ppm(const texture_t * texture, const char * filename){
 }
 
 void 
-save_texture_normalized_ppm(const texture_t * texture, const char * filename){
-	array_iterator_t * it = array_iterator_new(texture->buffer);
-	cRGB_t curcolor;
+save_texture_normalized_ppm(const Texture * texture, const char * filename){
+	ArrayIterator * it = array_iterator_new(texture->buffer);
+	ColorRGB curcolor;
 	FILE *fp = fopen(filename, "wb"); /* b - binary mode */
     (void) fprintf(fp, "P6\n%d %d\n255\n", texture->width, texture->height);
 	for( unsigned int curH = 0; curH < texture->height; curH++ )

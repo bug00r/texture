@@ -1,51 +1,51 @@
 #include "texture.h"
 
-texture_t * 
+Texture * 
 texture_new(unsigned int w, unsigned int h)
 {
-	texture_t * newtexture = malloc(sizeof(texture_t));
+	Texture * newtexture = malloc(sizeof(Texture));
 	newtexture->width=w;
 	newtexture->height=h;
 	//newtexture->buffer = crgb_array2D_new(w,h);
-	//cRGB_t black = {0.f, 0.f, 0.f};
+	//ColorRGB black = {0.f, 0.f, 0.f};
 	//crgb_array_init(newtexture->buffer, &black);
 	newtexture->buffer = color_array2D_new(w,h);
-	color_t black = COL_CREATE_RGBA(0,0,0,0);
+	Color black = COL_CREATE_RGBA(0,0,0,0);
 	color_array_init(newtexture->buffer, &black);
 	
 	return newtexture;
 }
 
-texture_t * texture_copy(texture_t * texture)
+Texture * texture_copy(Texture * texture)
 {
-	texture_t * newtexture = malloc(sizeof(texture_t));
+	Texture * newtexture = malloc(sizeof(Texture));
 	newtexture->width=texture->width;
 	newtexture->height=texture->height;
 	newtexture->buffer = array_copy_deep(texture->buffer);
 	return newtexture;
 }
 
-void texture_free(texture_t * texture)
+void texture_free(Texture * texture)
 {
 	array_free(texture->buffer);
 }
 
 void 
-noise_to_texture( noise_t * src, texture_t * target)
+Noiseo_texture( Noise * src, Texture * target)
 {
 	if ( src->map->config->size == target->buffer->config->size &&
 		 src->map->config->cnt == target->buffer->config->cnt) 
 	{
-		//cRGB_t * curcolor;
+		//ColorRGB * curcolor;
 		//float colval;
-		color_t * curcolor;
+		Color * curcolor;
 		int colval;
 		float * noise_array = (float*)src->map->entries;
-		array_iterator_t * it = array_iterator_new(target->buffer);
+		ArrayIterator * it = array_iterator_new(target->buffer);
 		while(array_iterator_has_next(it))
 		{
-			//curcolor = (cRGB_t *)array_iterator_next(it);
-			curcolor = (color_t *)array_iterator_next(it);
+			//curcolor = (ColorRGB *)array_iterator_next(it);
+			curcolor = (Color *)array_iterator_next(it);
 			float noise_val = noise_array[it->index];
 			colval = (int)interpolate_lin(noise_val, src->min, 0.f, src->max, 255.f);
 			*curcolor = COL_CREATE_RGBA(colval,colval,colval,0);
@@ -55,7 +55,7 @@ noise_to_texture( noise_t * src, texture_t * target)
 }
 
 void 
-mandelbrot_color_normal_8Bit(mandelbrot_t * mb, mandelbrot_point_t * mbt, /**cRGB_t*/ color_t * col)
+mandelbrot_color_normal_8Bit(Mandelbrot * mb, MandelbrotPoint * mbt, /**ColorRGB*/ Color * col)
 {
 	/**
 		float colfactor = 1.f/curresult.abs;
@@ -81,7 +81,7 @@ mandelbrot_color_normal_8Bit(mandelbrot_t * mb, mandelbrot_point_t * mbt, /**cRG
 }
 
 /**
-mandelbrot_t *mb = mandelbrot_new(w, h);
+Mandelbrot *mb = mandelbrot_new(w, h);
 	mb->minreal = -2.f;//-1.3f;
 	mb->maxreal = 0.5f;//-1.f;
 	mb->minimag = -1.f;//-.3f;
@@ -89,7 +89,7 @@ mandelbrot_t *mb = mandelbrot_new(w, h);
 	mb->cntiterations = 20;
 */
 void 
-mandelbrot_color_line_int_8Bit(mandelbrot_t * mb, mandelbrot_point_t * mbt, /**cRGB_t*/ color_t * col)
+mandelbrot_color_line_int_8Bit(Mandelbrot * mb, MandelbrotPoint * mbt, /**ColorRGB*/ Color * col)
 {
 	if(!mbt->isin)
 	{	
@@ -111,7 +111,7 @@ mandelbrot_color_line_int_8Bit(mandelbrot_t * mb, mandelbrot_point_t * mbt, /**c
 }
 
 void 
-mandelbrot_color_line_int_rgb(mandelbrot_t * mb, mandelbrot_point_t * mbt, /** cRGB_t */ color_t * col)
+mandelbrot_color_line_int_rgb(Mandelbrot * mb, MandelbrotPoint * mbt, /** ColorRGB */ Color * col)
 {
 	if(!mbt->isin)
 	{	
@@ -133,23 +133,23 @@ mandelbrot_color_line_int_rgb(mandelbrot_t * mb, mandelbrot_point_t * mbt, /** c
 }
 
 void 
-mandelbrot_to_texture( mandelbrot_t * src, texture_t * target, void (*mb_color_func)(mandelbrot_t * mb, mandelbrot_point_t * mbt, /**cRGB_t*/ color_t * col))
+Mandelbroto_texture( Mandelbrot * src, Texture * target, void (*mb_color_func)(Mandelbrot * mb, MandelbrotPoint * mbt, /**ColorRGB*/ Color * col))
 {
 	if ( src->map->config->size == target->buffer->config->size &&
 		 src->map->config->cnt == target->buffer->config->cnt) 
 	{
-		array_iterator_t * it = array_iterator_new(target->buffer);
-		mandelbrot_point_t * mb_array = (mandelbrot_point_t *)src->map->entries;
+		ArrayIterator * it = array_iterator_new(target->buffer);
+		MandelbrotPoint * mb_array = (MandelbrotPoint *)src->map->entries;
 		while(array_iterator_has_next(it))
 		{
-			(*mb_color_func)(src, &mb_array[it->index],(/**cRGB_t*/color_t *)array_iterator_next(it));
+			(*mb_color_func)(src, &mb_array[it->index],(/**ColorRGB*/Color *)array_iterator_next(it));
 		}
 		array_iterator_free(it);
 	}
 }
 
 void 
-julia_color_normal_8Bit(julia_t * src, julia_point_t * jbt, /**cRGB_t*/ color_t * col)
+julia_color_normal_8Bit(Julia * src, JuliaPoint * jbt, /**ColorRGB*/ Color * col)
 {
 	float colfactor = ((float)jbt->iterations)/(src->cntiterations*0.2f);
 	#if 0
@@ -176,7 +176,7 @@ julia_color_normal_8Bit(julia_t * src, julia_point_t * jbt, /**cRGB_t*/ color_t 
 }
 
 void 
-julia_color_line_int_8Bit(julia_t * julia, julia_point_t * jbt, /**cRGB_t*/ color_t * col)
+julia_color_line_int_8Bit(Julia * julia, JuliaPoint * jbt, /**ColorRGB*/ Color * col)
 {
 	if(jbt->isin)
 	{	
@@ -201,31 +201,31 @@ julia_color_line_int_8Bit(julia_t * julia, julia_point_t * jbt, /**cRGB_t*/ colo
 }
 
 void 
-julia_to_texture( julia_t * src, texture_t * target,  void (*jul_color_func)(julia_t * julia, julia_point_t * jbt, /**cRGB_t*/ color_t * col))
+Juliao_texture( Julia * src, Texture * target,  void (*jul_color_func)(Julia * julia, JuliaPoint * jbt, /**ColorRGB*/ Color * col))
 {
 	if ( src->map->config->size == target->buffer->config->size &&
 		 src->map->config->cnt == target->buffer->config->cnt) 
 	{
-		array_iterator_t * it = array_iterator_new(target->buffer);
-		julia_point_t * j_array = (julia_point_t *)src->map->entries;
+		ArrayIterator * it = array_iterator_new(target->buffer);
+		JuliaPoint * j_array = (JuliaPoint *)src->map->entries;
 		while(array_iterator_has_next(it))
 		{
-			(*jul_color_func)(src, &j_array[it->index], (/**cRGB_t*/color_t *)array_iterator_next(it));
+			(*jul_color_func)(src, &j_array[it->index], (/**ColorRGB*/Color *)array_iterator_next(it));
 		}
 		array_iterator_free(it);
 	}
 }
 
 void 
-filter_middle_median_box(texture_t * texture, unsigned int pxrange, float factor)
+filter_middle_median_box(Texture * texture, unsigned int pxrange, float factor)
 {
 	unsigned int maxlength = pxrange*2+1;
 	maxlength *= maxlength;
 	//float * values = malloc(maxlength * sizeof(float));
 	int * values = malloc(maxlength * sizeof(int));
 	
-	/**cRGB_t*/color_t * cref;
-	array_error_t array_res;
+	/**ColorRGB*/Color * cref;
+	ArrayError array_res;
 	
 	for (unsigned int h = 0; h < texture->height; ++h)
 	{
@@ -261,14 +261,14 @@ filter_middle_median_box(texture_t * texture, unsigned int pxrange, float factor
 }
 
 void 
-filter_middle_median_cross(texture_t * texture, unsigned int pxrange, float factor)
+filter_middle_median_cross(Texture * texture, unsigned int pxrange, float factor)
 {
 	unsigned int cntValues = (4*pxrange)+1;
 	//float * values = malloc(cntValues*sizeof(float));
 	int * values = malloc(cntValues*sizeof(float));
 	unsigned int maxidx = texture->width-1;
 	
-	/**cRGB_t*/ color_t * cref;
+	/**ColorRGB*/ Color * cref;
 	
 	for (unsigned int h = 0; h < texture->height; ++h)
 	{
@@ -319,10 +319,10 @@ filter_middle_median_cross(texture_t * texture, unsigned int pxrange, float fact
 }
 
 void 
-filter_middle_arith(texture_t * texture, unsigned int pxrange, float factor)
+filter_middle_arith(Texture * texture, unsigned int pxrange, float factor)
 {
-	/**cRGB_t*/color_t * cref;
-	array_error_t array_res;
+	/**ColorRGB*/Color * cref;
+	ArrayError array_res;
 	for (unsigned int h = 0; h < texture->height; ++h)
 	{
 	  for (unsigned int w = 0; w < texture->width; ++w)
@@ -352,7 +352,7 @@ filter_middle_arith(texture_t * texture, unsigned int pxrange, float factor)
 	}
 }
 
-void filter_gaussian(texture_t * texture, unsigned int pxrange, float deviation)
+void filter_gaussian(Texture * texture, unsigned int pxrange, float deviation)
 {
 
 	//https://homepages.inf.ed.ac.uk/rbf/HIPR2/gsmooth.htm
@@ -371,8 +371,8 @@ void filter_gaussian(texture_t * texture, unsigned int pxrange, float deviation)
 		}
 	}
 
-	color_t * cref;
-	array_error_t array_res;
+	Color * cref;
+	ArrayError array_res;
 	
 	for (unsigned int h = 0; h < texture->height; ++h)
 	{
@@ -402,15 +402,15 @@ void filter_gaussian(texture_t * texture, unsigned int pxrange, float deviation)
 }
 
 void 
-save_texture_ppm(texture_t * texture, const char * filename)
+save_texture_ppm(Texture * texture, const char * filename)
 {
-	array_iterator_t * it = array_iterator_new(texture->buffer);
-	color_t * curcolor;
+	ArrayIterator * it = array_iterator_new(texture->buffer);
+	Color * curcolor;
 	FILE *fp = fopen(filename, "wb"); /* b - binary mode */
     (void) fprintf(fp, "P6\n%d %d\n255\n", texture->width, texture->height);
 	while(array_iterator_has_next(it))
 	{
-		curcolor = (color_t *)array_iterator_next(it);
+		curcolor = (Color *)array_iterator_next(it);
 		static unsigned char color[3];
 		color[0] = (unsigned char)COL_GET_R(*curcolor);  
 		color[1] = (unsigned char)COL_GET_G(*curcolor);  

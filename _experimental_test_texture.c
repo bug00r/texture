@@ -22,12 +22,12 @@ typedef struct {
 
 typedef struct {
 	const char *name;
-	void (*filter)(texture_t * texture, unsigned int pxrange, float factor);
+	void (*filter)(Texture * texture, unsigned int pxrange, float factor);
 } texture_filter_t;
 
 typedef struct {
 	const char *name;
-	void (*manipulation)(texture_t * texture);
+	void (*manipulation)(Texture * texture);
 } texture_manipulation_t;
 
 typedef struct {
@@ -54,17 +54,17 @@ char * create_string(const char * msg, ...)
 	return buffer;
 }
 
-void texture_manipulation_brigthness_contrast(texture_t * texture)
+void texture_manipulation_brigthness_contrast(Texture * texture)
 {
-	array_iterator_t * it = array_iterator_new(texture->buffer);
-	/** cRGB_t*/color_t * curcolor;
-	/** cRGB_t*/color_t temp;
+	ArrayIterator * it = array_iterator_new(texture->buffer);
+	/** ColorRGB*/Color * curcolor;
+	/** ColorRGB*/Color temp;
 	
 	float contrast_factor = crgb_contrast_factor_255(seedrndlh(75.f, 80.f));
 	float brightness = seedrndlh(-35.f, -25.f);
 	while(array_iterator_has_next(it))
 	{
-		curcolor = (/** cRGB_t*/color_t *)array_iterator_next(it);
+		curcolor = (/** ColorRGB*/Color *)array_iterator_next(it);
 		color_brightness_255_dest(&temp, curcolor, (int)brightness);
 		color_contrast_255_dest(curcolor, &temp, contrast_factor);
 	}
@@ -117,8 +117,8 @@ void test_noise()
 
 	int w = 513;
 	int h = 513;
-	texture_t * texture = texture_new(w,h);
-	noise_t * noise = noise_new(w, h);
+	Texture * texture = texture_new(w,h);
+	Noise * noise = noise_new(w, h);
 	
 	unsigned int mediancross = 2;
 	float arithfactor = 1.f;
@@ -127,7 +127,7 @@ void test_noise()
 	float maxreduction = 2.f;
 	float reduction = maxreduction/((w-1)*(w-1));
 	
-	midpoint_displacement_t md_param;
+	MidpointDisplacement md_param;
 
 	middle_func4_t * curfunc4;
 	for (unsigned int mf4 = 0; ; ++mf4)
@@ -152,7 +152,7 @@ void test_noise()
 			texture_filter_t * curfilter;
 			for (unsigned int filter = 0; ; ++filter)
 			{
-				noise_to_texture( noise, texture);
+				Noiseo_texture( noise, texture);
 				curfilter = &tex_filter[filter];
 				if (curfilter->filter)
 				{
@@ -163,7 +163,7 @@ void test_noise()
 				
 				for (unsigned int manipulation = 0; ; ++manipulation)
 				{
-					texture_t * tex_copy = texture_copy(texture);
+					Texture * tex_copy = texture_copy(texture);
 					curmanipulation = &tex_manip[manipulation];
 					if (curmanipulation->manipulation)
 					{
@@ -192,7 +192,7 @@ void test_noise()
 		}
 	}
 	
-	diamond_square_t ds_param;
+	DiamondSquare ds_param;
 
 	for (unsigned int mf4 = 0; ; ++mf4)
 	{
@@ -210,7 +210,7 @@ void test_noise()
 		texture_filter_t * curfilter;
 		for (unsigned int filter = 0; ; ++filter)
 		{
-			noise_to_texture( noise, texture);
+			Noiseo_texture( noise, texture);
 			curfilter = &tex_filter[filter];
 			if (curfilter->filter)
 			{
@@ -221,7 +221,7 @@ void test_noise()
 			
 			for (unsigned int manipulation = 0; ; ++manipulation)
 			{
-				texture_t * tex_copy = texture_copy(texture);
+				Texture * tex_copy = texture_copy(texture);
 				curmanipulation = &tex_manip[manipulation];
 				if (curmanipulation->manipulation)
 				{
@@ -288,9 +288,9 @@ void test_fractals()
 	int w = 512;
 	int h = 512;
 	
-	texture_t * texture_fractals = texture_new(w,h);
+	Texture * texture_fractals = texture_new(w,h);
 	
-	julia_t *julia = julia_new(w, h);
+	Julia *julia = julia_new(w, h);
 	julia->minreal = -2.1f;//-1.3f;
 	julia->maxreal =  2.1f;//-1.f;
 	julia->minimag = -2.1f;//-.3f;
@@ -311,8 +311,8 @@ void test_fractals()
 			julia->polyfunc = curfunc->func;
 			julia->c = curconstant->c;
 			create_julia(julia);
-			//julia_to_texture(julia, texture_fractals, julia_color_normal_8Bit);
-			julia_to_texture(julia, texture_fractals, julia_color_line_int_8Bit);
+			//Juliao_texture(julia, texture_fractals, julia_color_normal_8Bit);
+			Juliao_texture(julia, texture_fractals, julia_color_line_int_8Bit);
 			#ifdef output
 				char * filename = create_string("build/julia_%s_%s.ppm", curconstant->name,
 																		 curfunc->name);
@@ -325,20 +325,20 @@ void test_fractals()
 	
 	julia_free(julia);
 		
-	mandelbrot_t *mb = mandelbrot_new(w, h);
+	Mandelbrot *mb = mandelbrot_new(w, h);
 	mb->minreal = -2.f;//-1.3f;
 	mb->maxreal = 0.5f;//-1.f;
 	mb->minimag = -1.f;//-.3f;
 	mb->maximag = 1.f;//0.f;
 	mb->cntiterations = 20;
 	create_mandelbrot(mb);
-	mandelbrot_to_texture(mb, texture_fractals, mandelbrot_color_normal_8Bit);
+	Mandelbroto_texture(mb, texture_fractals, mandelbrot_color_normal_8Bit);
 	#ifdef output
-		save_texture_ppm(texture_fractals, "build/mandelbrot_to_texture.ppm");
+		save_texture_ppm(texture_fractals, "build/Mandelbroto_texture.ppm");
 	#endif
-	mandelbrot_to_texture(mb, texture_fractals, mandelbrot_color_line_int_8Bit);
+	Mandelbroto_texture(mb, texture_fractals, mandelbrot_color_line_int_8Bit);
 	#ifdef output
-		save_texture_ppm(texture_fractals, "build/mandelbrot_to_texture_line_int_8bit.ppm");
+		save_texture_ppm(texture_fractals, "build/Mandelbroto_texture_line_int_8bit.ppm");
 	#endif
 	mandelbrot_free(mb);
 	texture_free(texture_fractals);

@@ -44,7 +44,7 @@ override CFLAGS+=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra
 #profiling
 #CFLAGS+=-pg 
 
-override CFLAGS+=-I/c/dev/include -I.
+override CFLAGS+=-I. -I/c/dev/include 
 
 NAME=texture
 
